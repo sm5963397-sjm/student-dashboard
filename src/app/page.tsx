@@ -35,10 +35,57 @@ const activity: ActivityItem[] = [
 
 type CoursesResult = {
   courses: Course[];
-  error: string | null;
+  status: "supabase" | "demo" | "empty" | "error";
+  message?: string;
 };
 
+const demoCourses: Course[] = [
+  {
+    id: "demo-ai-foundations",
+    title: "AI Product Foundations",
+    progress: 78,
+    icon_name: "brain",
+    created_at: "2026-05-24T08:00:00.000Z",
+  },
+  {
+    id: "demo-frontend-systems",
+    title: "Frontend Systems Sprint",
+    progress: 64,
+    icon_name: "code",
+    created_at: "2026-05-23T08:00:00.000Z",
+  },
+  {
+    id: "demo-analytics-lab",
+    title: "Learning Analytics Lab",
+    progress: 52,
+    icon_name: "analytics",
+    created_at: "2026-05-22T08:00:00.000Z",
+  },
+  {
+    id: "demo-supabase-flows",
+    title: "Supabase Data Flows",
+    progress: 36,
+    icon_name: "database",
+    created_at: "2026-05-21T08:00:00.000Z",
+  },
+];
+
+function hasSupabaseEnv() {
+  return Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() &&
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim(),
+  );
+}
+
 async function getCourses(): Promise<CoursesResult> {
+  if (!hasSupabaseEnv()) {
+    return {
+      courses: demoCourses,
+      status: "demo",
+      message: "Add real Supabase environment variables in Vercel to replace demo rows.",
+    };
+  }
+
   try {
     const supabase = await createSupabaseServerClient();
 
@@ -50,18 +97,28 @@ async function getCourses(): Promise<CoursesResult> {
     if (error) {
       return {
         courses: [],
-        error: error.message,
+        status: "error",
+        message: error.message,
+      };
+    }
+
+    if (!data || data.length === 0) {
+      return {
+        courses: [],
+        status: "empty",
+        message: "The courses table is connected, but no rows were returned.",
       };
     }
 
     return {
-      courses: (data ?? []) as Course[],
-      error: null,
+      courses: data as Course[],
+      status: "supabase",
     };
   } catch (error) {
     return {
       courses: [],
-      error: error instanceof Error ? error.message : "Unable to connect to Supabase.",
+      status: "error",
+      message: error instanceof Error ? error.message : "Unable to connect to Supabase.",
     };
   }
 }
@@ -75,25 +132,48 @@ function getAverageProgress(courses: Course[]) {
   return Math.round(total / courses.length);
 }
 
-function renderCourseTiles({ courses, error }: CoursesResult) {
-  if (error) {
-    return <ErrorCard kind="error" message={error} className="md:col-span-2 xl:col-span-3" />;
+function renderCourseTiles(result: CoursesResult) {
+  if (result.status === "error") {
+    return (
+      <ErrorCard
+        kind="error"
+        message={result.message}
+        className="md:col-span-2 xl:col-span-3"
+      />
+    );
   }
 
-  if (courses.length === 0) {
+  if (result.status === "empty") {
     return <ErrorCard kind="empty" className="md:col-span-2 xl:col-span-3" />;
   }
 
-  return courses.map((course, index) => (
-    <CourseCard key={course.id} course={course} index={index} />
-  ));
+  return (
+    <>
+      {result.status === "demo" ? (
+        <ErrorCard kind="demo" message={result.message} className="md:col-span-2 xl:col-span-4" />
+      ) : null}
+      {result.courses.map((course, index) => (
+        <CourseCard key={course.id} course={course} index={index} />
+      ))}
+    </>
+  );
 }
 
 export default async function Home() {
   const result = await getCourses();
-  const { courses, error } = result;
+  const { courses, status } = result;
   const averageProgress = getAverageProgress(courses);
-  const courseCount = error ? "Setup" : String(courses.length);
+  const courseCount = String(courses.length);
+  const courseDetail =
+    status === "supabase"
+      ? "Loaded from Supabase"
+      : status === "demo"
+        ? "Demo mode until Vercel env is set"
+        : status === "empty"
+          ? "Connected table has no rows"
+          : "Connection needs attention";
+  const progressDetail =
+    status === "supabase" ? "Calculated from Supabase rows" : "Calculated from visible course rows";
 
   return (
     <main className="dashboard-shell min-h-screen overflow-x-hidden bg-background text-foreground">
@@ -104,20 +184,20 @@ export default async function Home() {
 
         <section aria-label="Student dashboard" className="min-w-0">
           <BentoGrid>
-            <HeroCard streakDays={12} className="md:col-span-2 xl:col-span-3" />
+            <HeroCard streakDays={12} dataMode={status} className="md:col-span-2 xl:col-span-3" />
 
             <StatTile
               iconName="sparkles"
               label="Synced courses"
               value={courseCount}
-              detail={error ? "Add Supabase env values" : "Loaded on the server"}
+              detail={courseDetail}
               tone="cyan"
             />
             <StatTile
               iconName="gauge"
               label="Average progress"
               value={`${averageProgress}%`}
-              detail="Calculated from Supabase rows"
+              detail={progressDetail}
               tone="emerald"
             />
             <StatTile

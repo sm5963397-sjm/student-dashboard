@@ -28,6 +28,17 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 
 Keep `.env.local` out of git. Commit `.env.example` as the safe template. Do not add service role keys to this frontend project.
 
+For Vercel production:
+
+1. Open the Vercel project.
+2. Go to **Settings > Environment Variables**.
+3. Add `NEXT_PUBLIC_SUPABASE_URL` with your Supabase Project URL.
+4. Add `NEXT_PUBLIC_SUPABASE_ANON_KEY` with your Supabase anon public key.
+5. Select the environments you want to use, at minimum **Production**.
+6. Redeploy the latest production deployment after saving the variables.
+
+Do not leave those Vercel values blank. If either value is missing or empty, the dashboard keeps the real Server Component fetch path ready but shows polished demo course tiles instead of blocking the UI.
+
 ## Supabase Setup
 
 1. Create a Supabase project.
@@ -76,6 +87,8 @@ const { data, error } = await supabase
 ```
 
 If Supabase fails, the UI renders a premium error card. If the table is empty, it renders an empty state. Successful rows are passed from the Server Component into animated course tiles.
+
+When Supabase environment variables are not configured yet, the app renders demo course tiles with a clear demo notice. The real Supabase query remains the primary path and automatically replaces demo rows once valid Vercel environment variables are added.
 
 ## Framer Motion
 

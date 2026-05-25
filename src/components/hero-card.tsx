@@ -12,10 +12,16 @@ const spring = {
 
 type HeroCardProps = {
   streakDays: number;
+  dataMode: "supabase" | "demo" | "empty" | "error";
   className?: string;
 };
 
-export function HeroCard({ streakDays, className = "" }: HeroCardProps) {
+export function HeroCard({ streakDays, dataMode, className = "" }: HeroCardProps) {
+  const description =
+    dataMode === "supabase"
+      ? "Your dashboard is synced from Supabase Server Components, with live course progress and a focused path for today."
+      : "Supabase Server Components are wired in; polished demo courses stay visible until real environment values are configured.";
+
   return (
     <motion.article
       variants={tileVariants}
@@ -34,10 +40,7 @@ export function HeroCard({ streakDays, className = "" }: HeroCardProps) {
           <h1 className="mt-5 text-4xl font-semibold tracking-normal text-white md:text-6xl">
             Welcome back, Saurabh
           </h1>
-          <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300">
-            Your dashboard is synced from Supabase Server Components, with live course progress
-            and a focused path for today.
-          </p>
+          <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300">{description}</p>
         </header>
 
         <footer className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
