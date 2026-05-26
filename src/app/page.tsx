@@ -7,6 +7,7 @@ import { ErrorCard } from "@/components/error-card";
 import { HeroCard } from "@/components/hero-card";
 import { SettingsCard } from "@/components/settings-card";
 import { Sidebar } from "@/components/sidebar";
+import { getSupabaseConfig } from "@/lib/supabase/config";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { ActivityItem, Course } from "@/types/course";
 
@@ -73,10 +74,7 @@ const fallbackCourses: Course[] = [
 ];
 
 function hasSupabaseEnv() {
-  return Boolean(
-    process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() &&
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim(),
-  );
+  return getSupabaseConfig().isConfigured;
 }
 
 async function getCourses(): Promise<CoursesResult> {
