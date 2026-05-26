@@ -37,7 +37,7 @@ For Vercel production:
 5. Select the environments you want to use, at minimum **Production**.
 6. Redeploy the latest production deployment after saving the variables.
 
-Do not leave those Vercel values blank. If either value is missing or empty, the dashboard keeps the real Server Component fetch path ready but shows polished demo course tiles instead of blocking the UI.
+Do not leave those Vercel values blank. If either value is missing or empty, the dashboard keeps the real Server Component fetch path ready while showing a polished starter learning path instead of blocking the UI.
 
 ## Supabase Setup
 
@@ -86,9 +86,9 @@ const { data, error } = await supabase
   .order("created_at", { ascending: false });
 ```
 
-If Supabase fails, the UI renders a premium error card. If the table is empty, it renders an empty state. Successful rows are passed from the Server Component into animated course tiles.
+If Supabase fails, the UI renders a premium non-technical refresh state and keeps the dashboard useful. If the table is empty, it renders an empty state. Successful rows are passed from the Server Component into animated course tiles.
 
-When Supabase environment variables are not configured yet, the app renders demo course tiles with a clear demo notice. The real Supabase query remains the primary path and automatically replaces demo rows once valid Vercel environment variables are added.
+When Supabase environment variables are not configured yet, the app silently renders a starter learning path. The real Supabase query remains the primary path and automatically replaces the starter content once valid Vercel environment variables are added.
 
 ## Framer Motion
 
@@ -105,7 +105,7 @@ Motion is limited to transform and opacity for the page and card animations to a
 
 - Desktop above `1024px`: visible sidebar and full Bento Grid.
 - Tablet from `768px` to `1024px`: icon-only sidebar and two-column grid.
-- Mobile below `768px`: bottom navigation and one-column stacked cards.
+- Mobile below `768px`: hamburger navigation and one-column stacked cards.
 
 The app is dark mode only, with a near-black shell, glassmorphism cards, subtle gradient mesh, and grain texture.
 
@@ -126,6 +126,9 @@ src/
     bento-grid.tsx
     loading-skeleton.tsx
     error-card.tsx
+    analytics-card.tsx
+    coach-card.tsx
+    settings-card.tsx
   lib/
     supabase.ts
     supabase/

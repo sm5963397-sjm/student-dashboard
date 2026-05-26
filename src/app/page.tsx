@@ -1,8 +1,11 @@
 import { ActivityCard } from "@/components/activity-card";
-import { BentoGrid, StatTile } from "@/components/bento-grid";
+import { AnalyticsCard } from "@/components/analytics-card";
+import { BentoGrid, SectionHeader, StatTile } from "@/components/bento-grid";
+import { CoachCard } from "@/components/coach-card";
 import { CourseCard } from "@/components/course-card";
 import { ErrorCard } from "@/components/error-card";
 import { HeroCard } from "@/components/hero-card";
+import { SettingsCard } from "@/components/settings-card";
 import { Sidebar } from "@/components/sidebar";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { ActivityItem, Course } from "@/types/course";
@@ -35,35 +38,34 @@ const activity: ActivityItem[] = [
 
 type CoursesResult = {
   courses: Course[];
-  status: "supabase" | "demo" | "empty" | "error";
-  message?: string;
+  status: "supabase" | "fallback" | "empty" | "error";
 };
 
-const demoCourses: Course[] = [
+const fallbackCourses: Course[] = [
   {
-    id: "demo-ai-foundations",
+    id: "ai-product-foundations",
     title: "AI Product Foundations",
     progress: 78,
     icon_name: "brain",
     created_at: "2026-05-24T08:00:00.000Z",
   },
   {
-    id: "demo-frontend-systems",
+    id: "frontend-systems-sprint",
     title: "Frontend Systems Sprint",
     progress: 64,
     icon_name: "code",
     created_at: "2026-05-23T08:00:00.000Z",
   },
   {
-    id: "demo-analytics-lab",
+    id: "learning-analytics-lab",
     title: "Learning Analytics Lab",
     progress: 52,
     icon_name: "analytics",
     created_at: "2026-05-22T08:00:00.000Z",
   },
   {
-    id: "demo-supabase-flows",
-    title: "Supabase Data Flows",
+    id: "backend-data-flows",
+    title: "Backend Data Flows",
     progress: 36,
     icon_name: "database",
     created_at: "2026-05-21T08:00:00.000Z",
@@ -80,9 +82,8 @@ function hasSupabaseEnv() {
 async function getCourses(): Promise<CoursesResult> {
   if (!hasSupabaseEnv()) {
     return {
-      courses: demoCourses,
-      status: "demo",
-      message: "Add real Supabase environment variables in Vercel to replace demo rows.",
+      courses: fallbackCourses,
+      status: "fallback",
     };
   }
 
@@ -96,9 +97,8 @@ async function getCourses(): Promise<CoursesResult> {
 
     if (error) {
       return {
-        courses: [],
+        courses: fallbackCourses,
         status: "error",
-        message: error.message,
       };
     }
 
@@ -106,7 +106,6 @@ async function getCourses(): Promise<CoursesResult> {
       return {
         courses: [],
         status: "empty",
-        message: "The courses table is connected, but no rows were returned.",
       };
     }
 
@@ -115,10 +114,11 @@ async function getCourses(): Promise<CoursesResult> {
       status: "supabase",
     };
   } catch (error) {
+    console.error(error);
+
     return {
-      courses: [],
+      courses: fallbackCourses,
       status: "error",
-      message: error instanceof Error ? error.message : "Unable to connect to Supabase.",
     };
   }
 }
@@ -133,24 +133,14 @@ function getAverageProgress(courses: Course[]) {
 }
 
 function renderCourseTiles(result: CoursesResult) {
-  if (result.status === "error") {
-    return (
-      <ErrorCard
-        kind="error"
-        message={result.message}
-        className="md:col-span-2 xl:col-span-3"
-      />
-    );
-  }
-
   if (result.status === "empty") {
-    return <ErrorCard kind="empty" className="md:col-span-2 xl:col-span-3" />;
+    return <ErrorCard kind="empty" className="md:col-span-2 xl:col-span-4" />;
   }
 
   return (
     <>
-      {result.status === "demo" ? (
-        <ErrorCard kind="demo" message={result.message} className="md:col-span-2 xl:col-span-4" />
+      {result.status === "error" ? (
+        <ErrorCard kind="error" className="md:col-span-2 xl:col-span-4" />
       ) : null}
       {result.courses.map((course, index) => (
         <CourseCard key={course.id} course={course} index={index} />
@@ -165,30 +155,23 @@ export default async function Home() {
   const averageProgress = getAverageProgress(courses);
   const courseCount = String(courses.length);
   const courseDetail =
-    status === "supabase"
-      ? "Loaded from Supabase"
-      : status === "demo"
-        ? "Demo mode until Vercel env is set"
-        : status === "empty"
-          ? "Connected table has no rows"
-          : "Connection needs attention";
-  const progressDetail =
-    status === "supabase" ? "Calculated from Supabase rows" : "Calculated from visible course rows";
+    status === "empty" ? "Ready for new enrollments" : "Personalized learning path";
+  const progressDetail = "Across active courses";
 
   return (
     <main className="dashboard-shell min-h-screen overflow-x-hidden bg-background text-foreground">
       <span className="mesh-layer" />
 
-      <section className="relative mx-auto grid min-h-screen w-full max-w-7xl grid-cols-1 gap-4 px-4 pb-28 pt-4 md:grid-cols-[auto_minmax(0,1fr)] md:px-6 md:pb-6 lg:gap-6">
+      <section className="relative mx-auto grid min-h-screen w-full max-w-7xl grid-cols-1 gap-4 px-4 pb-10 pt-24 md:grid-cols-[auto_minmax(0,1fr)] md:px-6 md:pb-6 md:pt-4 lg:gap-6">
         <Sidebar />
 
         <section aria-label="Student dashboard" className="min-w-0">
           <BentoGrid>
-            <HeroCard streakDays={12} dataMode={status} className="md:col-span-2 xl:col-span-3" />
+            <HeroCard id="overview" streakDays={12} className="md:col-span-2 xl:col-span-3" />
 
             <StatTile
               iconName="sparkles"
-              label="Synced courses"
+              label="Active courses"
               value={courseCount}
               detail={courseDetail}
               tone="cyan"
@@ -215,10 +198,27 @@ export default async function Home() {
               tone="violet"
             />
 
-            <section id="courses" aria-label="Supabase course tiles" className="contents">
+            <SectionHeader
+              id="courses"
+              kicker="Course studio"
+              title="Continue your learning path"
+              description="Pick up the next lesson, compare progress, and open course details without leaving the dashboard."
+              className="md:col-span-2 xl:col-span-4"
+            />
+
+            <section aria-label="Course tiles" className="contents">
               {renderCourseTiles(result)}
             </section>
 
+            <AnalyticsCard
+              id="analytics"
+              activeCourses={courses.length}
+              averageProgress={averageProgress}
+              className="md:col-span-2 xl:col-span-4"
+            />
+
+            <CoachCard id="ai-coach" className="md:col-span-2 xl:col-span-2" />
+            <SettingsCard id="settings" className="md:col-span-2 xl:col-span-1" />
             <ActivityCard items={activity} className="md:col-span-2 xl:col-span-1" />
           </BentoGrid>
         </section>

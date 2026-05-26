@@ -1,6 +1,6 @@
 export function LoadingSkeleton() {
   return (
-    <main className="dashboard-shell min-h-screen bg-background px-4 pb-28 pt-4 text-foreground md:px-6 md:pb-6">
+    <main className="dashboard-shell min-h-screen bg-background px-4 pb-10 pt-24 text-foreground md:px-6 md:pb-6 md:pt-4">
       <span className="mesh-layer" />
       <section className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-4 md:grid-cols-[auto_minmax(0,1fr)] lg:gap-6">
         <aside className="glass-panel hidden h-[calc(100vh-32px)] w-20 animate-pulse rounded-lg md:block lg:w-64" />

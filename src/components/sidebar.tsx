@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import {
   BarChart3,
@@ -13,16 +13,17 @@ import {
 } from "lucide-react";
 
 const navItems = [
-  { label: "Overview", icon: Home },
-  { label: "Courses", icon: BookOpenCheck },
-  { label: "Analytics", icon: BarChart3 },
-  { label: "AI Coach", icon: Sparkles },
-  { label: "Settings", icon: Settings },
+  { label: "Overview", icon: Home, href: "#overview" },
+  { label: "Courses", icon: BookOpenCheck, href: "#courses" },
+  { label: "Analytics", icon: BarChart3, href: "#analytics" },
+  { label: "AI Coach", icon: Sparkles, href: "#ai-coach" },
+  { label: "Settings", icon: Settings, href: "#settings" },
 ];
 
 export function Sidebar() {
   const [activeItem, setActiveItem] = useState("Overview");
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <>
@@ -38,7 +39,7 @@ export function Sidebar() {
             </span>
             <section className={collapsed ? "hidden" : "hidden min-w-0 lg:block"}>
               <p className="truncate text-sm font-semibold text-white">NGL Dashboard</p>
-              <p className="truncate text-xs text-slate-400">Frontend challenge</p>
+              <p className="truncate text-xs text-slate-400">Learning workspace</p>
             </section>
           </section>
 
@@ -60,8 +61,8 @@ export function Sidebar() {
 
               return (
                 <li key={item.label}>
-                  <button
-                    type="button"
+                  <a
+                    href={item.href}
                     aria-label={item.label}
                     onClick={() => setActiveItem(item.label)}
                     className="relative flex h-11 w-full items-center gap-3 rounded-md px-3 text-left text-sm text-slate-400 transition-opacity hover:opacity-90"
@@ -83,7 +84,7 @@ export function Sidebar() {
                     >
                       {item.label}
                     </span>
-                  </button>
+                  </a>
                 </li>
               );
             })}
@@ -103,39 +104,84 @@ export function Sidebar() {
         </article>
       </aside>
 
-      <nav
-        aria-label="Mobile navigation"
-        className="glass-panel fixed inset-x-3 bottom-3 z-40 rounded-lg p-2 md:hidden"
-      >
-        <ul className="grid grid-cols-5 gap-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const active = activeItem === item.label;
+      <header className="fixed inset-x-3 top-3 z-50 md:hidden">
+        <section className="glass-panel flex items-center justify-between rounded-lg p-2">
+          <a
+            href="#overview"
+            className="flex min-w-0 items-center gap-3 px-2"
+            onClick={() => {
+              setActiveItem("Overview");
+              setMobileOpen(false);
+            }}
+          >
+            <span className="grid size-10 shrink-0 place-items-center rounded-lg border border-cyan-300/30 bg-cyan-300/10 text-cyan-200">
+              <GraduationCap aria-hidden="true" className="size-5" />
+            </span>
+            <section className="min-w-0">
+              <p className="truncate text-sm font-semibold text-white">NGL Dashboard</p>
+              <p className="truncate text-xs text-slate-400">Learning workspace</p>
+            </section>
+          </a>
 
-            return (
-              <li key={item.label}>
-                <button
-                  type="button"
-                  aria-label={item.label}
-                  onClick={() => setActiveItem(item.label)}
-                  className="relative flex h-12 w-full items-center justify-center rounded-md text-slate-400"
-                >
-                  {active ? (
-                    <motion.span
-                      layoutId="mobile-active-item"
-                      className="absolute inset-0 rounded-md border border-cyan-300/30 bg-cyan-300/10"
-                    />
-                  ) : null}
-                  <Icon
-                    aria-hidden="true"
-                    className={`relative size-5 ${active ? "text-cyan-100" : ""}`}
-                  />
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
+          <button
+            type="button"
+            aria-label={mobileOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={mobileOpen}
+            onClick={() => setMobileOpen((value) => !value)}
+            className="grid size-10 shrink-0 place-items-center rounded-md border border-white/10 bg-white/5 text-slate-200 transition-opacity hover:opacity-85"
+          >
+            <Menu aria-hidden="true" className="size-5" />
+          </button>
+        </section>
+
+        <AnimatePresence>
+          {mobileOpen ? (
+            <motion.nav
+              aria-label="Mobile navigation"
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className="glass-panel mt-2 rounded-lg p-2"
+            >
+              <ul className="grid gap-1">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  const active = activeItem === item.label;
+
+                  return (
+                    <li key={item.label}>
+                      <a
+                        href={item.href}
+                        aria-label={item.label}
+                        onClick={() => {
+                          setActiveItem(item.label);
+                          setMobileOpen(false);
+                        }}
+                        className="relative flex h-11 items-center gap-3 rounded-md px-3 text-sm text-slate-300"
+                      >
+                        {active ? (
+                          <motion.span
+                            layoutId="mobile-active-item"
+                            className="absolute inset-0 rounded-md border border-cyan-300/30 bg-cyan-300/10"
+                          />
+                        ) : null}
+                        <Icon
+                          aria-hidden="true"
+                          className={`relative size-4 shrink-0 ${active ? "text-cyan-100" : ""}`}
+                        />
+                        <span className={`relative ${active ? "text-cyan-100" : ""}`}>
+                          {item.label}
+                        </span>
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </motion.nav>
+          ) : null}
+        </AnimatePresence>
+      </header>
     </>
   );
 }
