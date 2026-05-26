@@ -94,6 +94,12 @@ async function getCourses(): Promise<CoursesResult> {
       .order("created_at", { ascending: false });
 
     if (error) {
+      console.error("Supabase courses query failed", {
+        code: error.code,
+        message: error.message,
+        hint: error.hint,
+      });
+
       return {
         courses: fallbackCourses,
         status: "error",
