@@ -77,6 +77,10 @@ function hasSupabaseEnv() {
   return getSupabaseConfig().isConfigured;
 }
 
+function isNetworkFetchFailure(error: { message?: string }) {
+  return error.message?.toLowerCase().includes("fetch failed") ?? false;
+}
+
 async function getCourses(): Promise<CoursesResult> {
   if (!hasSupabaseEnv()) {
     return {
@@ -102,7 +106,7 @@ async function getCourses(): Promise<CoursesResult> {
 
       return {
         courses: fallbackCourses,
-        status: "error",
+        status: isNetworkFetchFailure(error) ? "fallback" : "error",
       };
     }
 

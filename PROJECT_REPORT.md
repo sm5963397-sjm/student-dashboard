@@ -12,7 +12,7 @@ Report date: May 26, 2026
 
 The dashboard implementation is ready for review as a polished Next.js frontend submission. It includes the App Router, TypeScript, Tailwind CSS, Framer Motion interactions, Lucide icons, Supabase Server Component data fetching, loading/error/empty states, and a responsive dark Bento Grid dashboard.
 
-The only remaining blocker for fully verified live Supabase syncing is the missing Vercel Production value for `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Vercel currently has `NEXT_PUBLIC_SUPABASE_URL`, but the anon public key still needs to be added from Supabase Project Settings. The SQL file to create and seed the `courses` table is already included at `supabase/setup.sql`.
+The only remaining blocker for fully verified live Supabase syncing is a valid reachable Supabase project. Vercel now has both public environment variable names, but the configured project URL `https://xiczdsvdfrlgrjvrfcch.supabase.co` does not resolve in DNS, so Supabase requests fail before the app can query the `courses` table. The SQL file to create and seed the table is already included at `supabase/setup.sql`.
 
 ## Build And Quality Status
 
@@ -27,7 +27,7 @@ The only remaining blocker for fully verified live Supabase syncing is the missi
 Notes:
 
 - `npm audit` reports moderate advisories from the current Next.js dependency chain. The available forced fix would downgrade Next.js to an old major version, so it is intentionally not applied.
-- Real Supabase rows cannot be verified on Vercel until the anon public key is added and the setup SQL has been run in the Supabase project.
+- Real Supabase rows cannot be verified on Vercel until the Supabase project URL resolves, the anon public key matches that project, and the setup SQL has been run in the Supabase project.
 
 ## Supabase Status
 
@@ -91,8 +91,8 @@ Do not use or expose the `service_role` key in this frontend project.
 
 ## Not Built Or Still Pending
 
-- Live Supabase syncing is not fully verified because `NEXT_PUBLIC_SUPABASE_ANON_KEY` is not present in Vercel Production.
-- The `courses` table cannot be verified from this environment until the Supabase owner runs `supabase/setup.sql` or provides access/keys.
+- Live Supabase syncing is not fully verified because the configured Supabase host `xiczdsvdfrlgrjvrfcch.supabase.co` currently has no DNS record.
+- The `courses` table cannot be verified from this environment until the Supabase owner creates or reopens the project, runs `supabase/setup.sql`, and confirms the matching Project URL and anon public key.
 - No real Supabase secrets are committed or exposed.
 - The app keeps polished starter content available while Supabase credentials are incomplete, so users do not see technical setup warnings.
 
