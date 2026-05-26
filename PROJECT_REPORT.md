@@ -19,6 +19,8 @@ The only remaining blocker for fully verified live Supabase syncing is the missi
 - Local install: passed with `npm install`
 - Lint command: passed with `npm run lint`
 - Production build command: passed with `npm run build`
+- Vercel production deployment: passed and aliased to https://next-gen-learning-dashboard-inky.vercel.app
+- Live responsive smoke check: passed at 1440px desktop, 900px tablet, and 390px mobile
 - Environment template: `.env.example`
 - Local secrets: `.env.local` is ignored by git and must not be committed
 
