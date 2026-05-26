@@ -41,11 +41,22 @@ Do not leave those Vercel values blank. If either value is missing or empty, the
 
 ## Supabase Setup
 
-1. Create a Supabase project.
-2. Open **Project Settings > API**.
-3. Copy the Project URL and anon public key.
-4. Paste those public values into `.env.local`.
-5. Run the SQL below in the Supabase SQL editor.
+Your Supabase project URL is:
+
+```txt
+https://xiczdsvdfrlgrjvrfcch.supabase.co
+```
+
+Supabase creates the Postgres database automatically when the project is created. This app needs a `courses` table inside that database.
+
+1. Open the Supabase project dashboard.
+2. Go to **SQL Editor**.
+3. Paste and run [`supabase/setup.sql`](./supabase/setup.sql).
+4. Go to **Project Settings > Data API**.
+5. Copy the Project URL and anon public key.
+6. Add both public values to `.env.local` and Vercel Production.
+
+The setup SQL creates the `courses` table, enables RLS, adds a public read policy, and inserts starter rows.
 
 ```sql
 create extension if not exists pgcrypto;
@@ -72,7 +83,7 @@ values
   ('AI Product Foundations', 78, 'brain', now() - interval '1 day'),
   ('Frontend Systems Sprint', 64, 'code', now() - interval '2 days'),
   ('Learning Analytics Lab', 52, 'analytics', now() - interval '3 days'),
-  ('Supabase Data Flows', 36, 'database', now() - interval '4 days');
+  ('Backend Data Flows', 36, 'database', now() - interval '4 days');
 ```
 
 ## Server Component Data Fetching
