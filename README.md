@@ -2,6 +2,8 @@
 
 A premium dark Student Dashboard built with Next.js App Router, TypeScript, Tailwind CSS, Framer Motion, Lucide React, and Supabase.
 
+See [`PROJECT_REPORT.md`](./PROJECT_REPORT.md) for the final PDF rubric checklist, build status, Supabase readiness notes, and remaining verification steps.
+
 ## Getting Started
 
 ```bash
